@@ -75,7 +75,7 @@ public class Program {
             anexoI.click();
             TimeUnit.SECONDS.sleep(2); // wait seconds to click in the second file
             anexoII.click();
-            TimeUnit.SECONDS.sleep(30); // wait seconds to complete download
+            TimeUnit.SECONDS.sleep(40); // wait seconds to complete download
 
             File outputZipFile = new File(System.getProperty("user.dir") + "\\src\\output.zip");
             Path[] pathsArray = mapFilesToPath();
