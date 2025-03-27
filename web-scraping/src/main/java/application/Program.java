@@ -54,7 +54,15 @@ public class Program {
         return pathsArray;
     }
 
+    public static void clearOutputDir() {
+        File downloadsDir = new File(System.getProperty("user.dir") + "\\src\\output");
+        for (File file : Objects.requireNonNull(downloadsDir.listFiles())) {
+            file.delete();
+        }
+    }
+
     public static void main(String[] args) {
+        clearOutputDir();
         setupDriver();
 
         try {

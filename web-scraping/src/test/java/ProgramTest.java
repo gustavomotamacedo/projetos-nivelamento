@@ -54,4 +54,12 @@ public class ProgramTest {
         File outDir = new File(System.getProperty("user.dir") + "\\src\\output.zip");
         assert outDir.exists();
     }
+
+    @Test
+    public void clearOutputDirTest() {
+        Program.clearOutputDir();
+        File outDir = new File(System.getProperty("user.dir") + "\\src\\output");
+        assert outDir.exists();
+        assert outDir.listFiles().length == 0;
+    }
 }
