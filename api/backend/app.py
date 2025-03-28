@@ -5,9 +5,13 @@
 import pandas as pd
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 
 # Inicializa a aplicação Flask
 app = Flask(__name__)
+
+# Habilita a CORS para todas as origens
+CORS(app)
 
 app.config['JSON_SORT_KEYS'] = False
 
@@ -43,8 +47,9 @@ class Operadora(db.Model):
     Regiao_de_Comercializacao = db.Column(db.Integer, nullable=True)
     Data_Registro_ANS = db.Column(db.Date, nullable=False)
 
-@app.route('/operadoras/<text>', methods=['GET'])
+@app.route('/operadoras/<string:text>', methods=['GET'])
 def get_operadoras(text):
+    import math
     # Consulta o banco de dados para buscar operadoras com base no texto
     operadoras = Operadora.query.filter(
         (Operadora.Razao_Social.ilike(f'%{text}%')) |
@@ -57,8 +62,38 @@ def get_operadoras(text):
         (Operadora.Representante.ilike(f'%{text}%'))
     ).all()
     # Converte os resultados em um DataFrame
-    df = pd.DataFrame([operadora.__dict__ for operadora in operadoras])
-    # Remove a chave '_sa_instance_state' do DataFrame
-    df.drop('_sa_instance_state', axis=1, inplace=True)
-    # Retorna o DataFrame como JSON
-    return jsonify(df.to_dict(orient='records'))
+    result = []
+    for op in operadoras:
+        regiao = op.Regiao_de_Comercializacao
+        data_registro = op.Data_Registro_ANS
+        
+        # Substitui NaN por None (que será serializado como null em JSON)
+        if regiao is not None and (isinstance(regiao, float) or isinstance(regiao, int)) and math.isnan(regiao):
+            regiao = None
+
+        result.append({
+            "Registro_ANS": op.Registro_ANS,
+            "CNPJ": op.CNPJ,
+            "Razao_Social": op.Razao_Social,
+            "Nome_Fantasia": op.Nome_Fantasia,
+            "Modalidade": op.Modalidade,
+            "Logradouro": op.Logradouro,
+            "Numero": op.Numero,
+            "Complemento": op.Complemento,
+            "Bairro": op.Bairro,
+            "Cidade": op.Cidade,
+            "UF": op.UF,
+            "CEP": op.CEP,
+            "DDD": op.DDD,
+            "Telefone": op.Telefone,
+            "Fax": op.Fax,
+            "Endereco_eletronico": op.Endereco_eletronico,
+            "Representante": op.Representante,
+            "Cargo_Representante": op.Cargo_Representante,
+            "Regiao_de_Comercializacao": regiao,
+            "Data_Registro_ANS": data_registro,
+        })
+
+    return jsonify(result)
+if __name__ == '__main__':
+    app.run(port=8080)  # Substitua 5001 pela porta desejada
